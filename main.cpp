@@ -1,12 +1,14 @@
-﻿//
-#include <stdio.h>
-#include <stdlib.h>
-#if defined(_WIN32)
+﻿#if defined(_WIN32)
 #  define _USE_MATH_DEFINES
 #  define _CRT_SECURE_NO_WARNINGS
 #  include <GL/glew.h>
 #  include <GL/glut.h>
-#  include <GL/glext.h>
+#  if defined(near)
+#    undef near
+#  endif
+#  if defined(far)
+#    undef far
+#  endif
 #elif defined(__APPLE__) || defined(MACOSX)
 #  define GL_SILENCE_DEPRECATION
 #  include <GLUT/glut.h>
@@ -14,6 +16,8 @@
 #  define GL_GLEXT_PROTOTYPES
 #  include <GL/glut.h>
 #endif
+#include <stdio.h>
+#include <stdlib.h>
 
 /*
 ** シェーダのソースプログラムの読み込みに使う関数
@@ -92,17 +96,12 @@ static void init(void)
   Position *position;
 
 #if defined(_WIN32)
-#  define _USE_MATH_DEFINES
-#  define _CRT_SECURE_NO_WARNINGS
-#  include <GL/glew.h>
-#  include <GL/glut.h>
-#  include <GL/glext.h>
-#elif defined(__APPLE__) || defined(MACOSX)
-#  define GL_SILENCE_DEPRECATION
-#  include <GLUT/glut.h>
-#else
-#  define GL_GLEXT_PROTOTYPES
-#  include <GL/glut.h>
+  /* GLEW の初期化 */
+  GLenum err = glewInit();
+  if (err != GLEW_OK) {
+    fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+    exit(1);
+  }
 #endif
 
   /* 背景色 */
@@ -174,14 +173,14 @@ static void init(void)
   position = (Position *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
   /* 頂点バッファオブジェクトのメモリにデータを書き込む */
-  position[0][0] =  0.9;
-  position[0][1] =  0.9;
-  position[1][0] = -0.9;
-  position[1][1] =  0.9;
-  position[2][0] = -0.9;
-  position[2][1] = -0.9;
-  position[3][0] =  0.9;
-  position[3][1] = -0.9;
+  position[0][0] =  0.9f;
+  position[0][1] =  0.9f;
+  position[1][0] = -0.9f;
+  position[1][1] =  0.9f;
+  position[2][0] = -0.9f;
+  position[2][1] = -0.9f;
+  position[3][0] =  0.9f;
+  position[3][1] = -0.9f;
 
   /* 頂点バッファオブジェクトのメモリをプログラムのメモリ空間から切り離す */
   glUnmapBuffer(GL_ARRAY_BUFFER);
