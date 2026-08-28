@@ -28,13 +28,21 @@ static GLuint fragShader;
 static GLuint gl2Program;
 
 /*
-** 投影変換行列
+** 直交投影変換行列を求める
 */
 extern void orthogonalMatrix(float left, float right,
   float bottom, float top,
   float zNear, float zFar,
   GLfloat* matrix);
+
+/*
+** 投影変換行列
+*/
 static GLfloat projectionMatrix[16];
+
+/*
+** 投影変換行列の uniform 変数の場所
+*/
 static GLint projectionMatrixLocation;
 
 /*
@@ -53,7 +61,7 @@ static void display(void)
   /* シェーダプログラムを適用する */
   glUseProgram(gl2Program);
 
-  /* index が 0 の attribute 変数の頂点バッファオブジェクトへの対応付けを有効にする */
+  /* 投影変換行列の uniform 変数 projectionMatrix に変換行列の値を設定する */
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, projectionMatrix);
 
   /* 頂点バッファオブジェクトとして buffer を指定する */
@@ -64,9 +72,6 @@ static void display(void)
 
   /* 頂点バッファオブジェクトを解放する */
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  /* index が 0 の attribute 変数の頂点バッファオブジェクトとの対応付けを無効にする */
-  glDisableVertexAttribArray(0);
 
   glFlush();
 }
