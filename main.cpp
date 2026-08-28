@@ -3,13 +3,7 @@
 #  define _CRT_SECURE_NO_WARNINGS
 #  include <GL/glew.h>
 #  include <GL/glut.h>
-#  if defined(near)
-#    undef near
-#  endif
-#  if defined(far)
-#    undef far
-#  endif
-#elif defined(__APPLE__) || defined(MACOSX)
+#elif defined(__APPLE__)
 #  define GL_SILENCE_DEPRECATION
 #  include <GLUT/glut.h>
 #else
@@ -22,7 +16,7 @@
 /*
 ** シェーダのソースプログラムの読み込みに使う関数
 */
-extern int readShaderSource(GLuint shader, const char *file);
+extern int readShaderSource(GLuint shader, const char* file);
 extern void printShaderInfoLog(GLuint shader);
 extern void printProgramInfoLog(GLuint program);
 
@@ -37,9 +31,9 @@ static GLuint gl2Program;
 ** 投影変換行列
 */
 extern void orthogonalMatrix(float left, float right,
-                             float bottom, float top,
-                             float near, float far,
-                             GLfloat *matrix);
+  float bottom, float top,
+  float zNear, float zFar,
+  GLfloat* matrix);
 static GLfloat projectionMatrix[16];
 static GLint projectionMatrixLocation;
 
@@ -59,17 +53,11 @@ static void display(void)
   /* シェーダプログラムを適用する */
   glUseProgram(gl2Program);
 
-  /* uniform 変数 projectionMatrix に行列を設定する */
+  /* index が 0 の attribute 変数の頂点バッファオブジェクトへの対応付けを有効にする */
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, projectionMatrix);
-
-  /* index が 0 の attribute 変数に頂点情報を対応付ける */
-  glEnableVertexAttribArray(0);
 
   /* 頂点バッファオブジェクトとして buffer を指定する */
   glBindBuffer(GL_ARRAY_BUFFER, buffer);
-
-  /* 頂点情報の格納場所と書式を指定する */
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
   /* 図形を描く */
   glDrawArrays(GL_LINE_LOOP, 0, 4);
@@ -77,7 +65,7 @@ static void display(void)
   /* 頂点バッファオブジェクトを解放する */
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  /* index が 0 の attribute 変数の頂点情報との対応付けを解除する */
+  /* index が 0 の attribute 変数の頂点バッファオブジェクトとの対応付けを無効にする */
   glDisableVertexAttribArray(0);
 
   glFlush();
@@ -93,7 +81,7 @@ static void init(void)
 
   /* 頂点バッファオブジェクトのメモリを参照するポインタ */
   typedef GLfloat Position[2];
-  Position *position;
+  Position* position;
 
 #if defined(_WIN32)
   /* GLEW の初期化 */
@@ -156,6 +144,9 @@ static void init(void)
     exit(1);
   }
 
+  /* index が 0 の attribute 変数を有効にする */
+  glEnableVertexAttribArray(0);
+
   /* 平行投影変換行列を求める */
   orthogonalMatrix(0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f, projectionMatrix);
 
@@ -167,23 +158,26 @@ static void init(void)
 
   /* 頂点バッファオブジェクトに４頂点分のメモリ領域を確保する */
   glBindBuffer(GL_ARRAY_BUFFER, buffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof (Position) * 4, NULL, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(Position) * 4, NULL, GL_STATIC_DRAW);
 
   /* 頂点バッファオブジェクトのメモリをプログラムのメモリ空間にマップする */
-  position = (Position *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+  position = (Position*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
   /* 頂点バッファオブジェクトのメモリにデータを書き込む */
-  position[0][0] =  0.9f;
-  position[0][1] =  0.9f;
+  position[0][0] = 0.9f;
+  position[0][1] = 0.9f;
   position[1][0] = -0.9f;
-  position[1][1] =  0.9f;
+  position[1][1] = 0.9f;
   position[2][0] = -0.9f;
   position[2][1] = -0.9f;
-  position[3][0] =  0.9f;
+  position[3][0] = 0.9f;
   position[3][1] = -0.9f;
 
   /* 頂点バッファオブジェクトのメモリをプログラムのメモリ空間から切り離す */
   glUnmapBuffer(GL_ARRAY_BUFFER);
+
+  /* index が 0 の attribute 変数に頂点バッファオブジェクトの場所と書式を設定する */
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
   /* 頂点バッファオブジェクトを解放する */
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -192,7 +186,7 @@ static void init(void)
 /*
 ** メインプログラム
 */
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB);
