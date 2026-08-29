@@ -95,9 +95,9 @@ OpenGL 3.0 以降で廃止された `glMatrixMode()`, `glLoadIdentity()`, `glOrt
 
 ## 6. プログラムの解説
 
-### 6.1 平行投影変換行列の算出
+### 6.1 平行投影変換行列の作成 (matrix.cpp)
 
-```cpp
+`cpp
 void orthogonalMatrix(float left, float right,
   float bottom, float top,
   float zNear, float zFar,
@@ -117,20 +117,40 @@ void orthogonalMatrix(float left, float right,
   matrix[1] = matrix[2] = matrix[3] = matrix[4] =
     matrix[6] = matrix[7] = matrix[8] = matrix[9] = matrix[11] = 0.0f;
 }
-```
+`
 
-### 6.2 バーテックスシェーダでの座標変換
+### 6.2 図形の描画 (display)
 
-```glsl
-// simple.vert
-#version 120
+`cpp
+/* 画面クリア */
+glClear(GL_COLOR_BUFFER_BIT);
 
-invariant gl_Position;
-attribute vec2 position;
-uniform mat4 projectionMatrix;
+/* プログラムオブジェクトを適用する */
+glUseProgram(gl2Program);
 
-void main(void)
-{
-  gl_Position = projectionMatrix * vec4(position, 0.0, 1.0);
-}
-```
+/* 投影変換行列の uniform 変数 projectionMatrix に変換行列の値を設定する */
+glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, projectionMatrix);
+
+/* 頂点バッファオブジェクトとして buffer を指定する */
+glBindBuffer(GL_ARRAY_BUFFER, buffer);
+
+/* index が 0 の attribute 変数を有効にする */
+glEnableVertexAttribArray(0);
+
+/* index が 0 の attribute 変数に頂点バッファオブジェクトの場所と書式を設定する */
+glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+/* 図形を描く */
+glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+/* index が 0 の attribute 変数を無効にする */
+glDisableVertexAttribArray(0);
+
+/* 頂点バッファオブジェクトを解放する */
+glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+/* 固定機能に戻す */
+glUseProgram(0);
+
+glFlush();
+`
