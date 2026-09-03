@@ -4,7 +4,7 @@
 
 このプログラムは、OpenGL の **GLSL バーテックスシェーダ** と **uniform 変数** を用いて、自前で算出した投影変換行列（平行投影変換 `orthogonalMatrix` / 透視投影変換 `perspectiveMatrix`）を適用し、頂点座標をクリッピング空間へ写像して描画する手順を学ぶための、学生向けのサンプルプログラムです。本プログラムは、以下のブログ記事の解説に沿って学習を進めるための雛形として提供されています。
 
-- [第５回 座標変換](https://tokoik.github.io/blog/今風%20opengl%20の使い方/2009/08/29/glsl.html)
+- [第５回 座標変換](https://tokoik.github.io/blog/2009-08-29.html)
 
 OpenGL 3.0 以降で廃止された `glMatrixMode()`, `glLoadIdentity()`, `glOrtho()`, `gluPerspective()` などの固定機能行列スタックを使わず、CPU 側で行列を計算して `glUniformMatrix4fv()` でシェーダに渡す今風の手法を学習します。
 
